@@ -1,0 +1,7 @@
+{
+  "directories": [
+    {"path": "/var/log/stackmachine"}
+  ],
+  "packages": [
+  ]
+}
