@@ -2,6 +2,9 @@
   "directories": [
     {"path": "/var/log/stackmachine"}
   ],
+  "personal_package_archives": [
+    {"name": "pitti/postgresql"}
+  ],
   "packages": [
   ]
 }
