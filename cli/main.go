@@ -2,31 +2,40 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"github.com/stackmachine/stackgo"
+	"io/ioutil"
 	"log"
-	"os"
 )
 
 func main() {
-	if false {
-		manifest, err := stackgo.Analyze()
+	flag.Parse()
+
+	manifests := []stackgo.Manifest{}
+
+	for _, path := range flag.Args() {
+		contents, err := ioutil.ReadFile(path)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		b, err := json.Marshal(manifest)
+		var manifest stackgo.Manifest
+
+		err = json.Unmarshal(contents, &manifest)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		os.Stdout.Write(b)
-	} 
-	
-	err := stackgo.Converge()
+		manifests = append(manifests, manifest)
+	}
 
-	if err != nil {
-		log.Fatal(err)
+	for _, manifest := range manifests {
+		err := manifest.Converge()
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }

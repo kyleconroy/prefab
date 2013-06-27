@@ -1,7 +1,7 @@
 package stackgo
 
 import (
-	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -10,57 +10,19 @@ import (
 	"os/exec"
 )
 
-type Directory struct {
-	Path string `json:"path"`
-}
-
-type Package struct {
-	Name string `json:"name"`
-}
-
-type Archive struct {
-	Name string `json:"name"`
-}
-
-type Manifest struct {
-	Directories []Directory `json:"directories"`
-	Packages    []Package   `json:"packages"`
-	Archives    []Archive   `json:"personal_package_archives"`
-}
-
-func Analyze() (Manifest, error) {
-	return Manifest{}, nil
-}
-
-// Install Postgres
-func InstallPostgres(version string) error {
-	log.Println("Install postgres")
-
-	path := "/etc/apt/sources.list.d/pgdg.list"
-
-	_, err := os.Stat("/etc/apt/sources.list.d/pgdg.list")
-
-	if os.IsNotExist(err) {
-		line := "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main\n"
-
-		err = ioutil.WriteFile(path, []byte(line), 0644)
+func download(uri string) (string, error) {
+		f, err := ioutil.TempFile("", "download")
 
 		if err != nil {
-			return err
-		}
-
-		f, err := ioutil.TempFile("", "stackmachine")
-
-		if err != nil {
-			return err
+			return "", err
 		}
 
 		defer f.Close()
 
-		resp, err := http.Get("http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc")
+		resp, err := http.Get(uri)
 
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		defer resp.Body.Close()
@@ -68,26 +30,79 @@ func InstallPostgres(version string) error {
 		_, err = io.Copy(f, resp.Body)
 
 		if err != nil {
-			return err
+			return "",err
 		}
 
-		out, err := exec.Command("apt-key", "add", f.Name()).Output()
+		return f.Name(), nil
 
-		if err != nil {
-			log.Println(string(out))
-			return err
-		}
+}
 
-		out, err = exec.Command("apt-get", "update").Output()
+type Package struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
 
-		if err != nil {
-			log.Println(string(out))
-			return err
-		}
+func (p Package) Install() error {
+	log.Println("Install package: ", p.Name)
 
+	out, err := exec.Command("apt-get", "install", "-y", p.Name).Output()
+
+	if err != nil {
+		log.Println(out)
 	}
 
-	out, err := exec.Command("apt-get", "install", "-y", "postgresql-"+version).Output()
+	return err
+}
+
+type PackageRepository struct {
+	Name         string   `json:"name"`
+	Uri          string   `json:"uri"`
+	Distribution string   `json:"distribution"`
+	KeyURI       string   `json:"gpg_key_uri"`
+	Components   []string `json:"components"`
+}
+
+func (pr *PackageRepository) Path() string {
+	return "/etc/apt/sources.list.d/" + pr.Name + ".list"
+}
+
+func (pr *PackageRepository) Entry() string {
+	// TODO: Add component support
+	return fmt.Sprintf("deb %s %s main", pr.Uri, pr.Distribution)
+}
+
+// Return created, error
+func (pr *PackageRepository) InstallSourceList() (bool, error) {
+	_, err := os.Stat(pr.Path())
+
+	if os.IsNotExist(err) {
+		log.Println("Install source list")
+
+		err = ioutil.WriteFile(pr.Path(), []byte(pr.Entry()), 0644)
+
+		if err != nil {
+			return false, err
+		}
+
+		return true, nil
+	}
+
+	return false, nil
+}
+
+
+
+func (pr *PackageRepository) InstallKey() error {
+	// TODO: Figure out cache module
+	keyPath, err := download(pr.KeyURI)
+
+	if err != nil {
+		return err
+	}
+
+	log.Println("Install key")
+
+	out, err := exec.Command("apt-key", "add", keyPath).Output()
 
 	if err != nil {
 		log.Println(string(out))
@@ -97,25 +112,59 @@ func InstallPostgres(version string) error {
 	return nil
 }
 
-func Converge() error {
-	var manifest Manifest
 
-	contents, err := ioutil.ReadFile("manifest.json")
-
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(contents, &manifest)
+func (pr *PackageRepository) Install() error {
+	source_added, err := pr.InstallSourceList()
 
 	if err != nil {
 		return err
 	}
 
-	err = InstallPostgres("9.2")
+	//Fix this
+	if !source_added  {
+		return nil
+	}
+
+	err = pr.InstallKey()
 
 	if err != nil {
 		return err
+	}
+
+	out, err := exec.Command("apt-get", "update").Output()
+
+	if err != nil {
+		log.Println(string(out))
+		return err
+	}
+
+	return nil
+}
+
+type Manifest struct {
+	PackageRepos []PackageRepository `json:"package_repositories"`
+	Packages     []Package           `json:"packages"`
+}
+
+func Analyze() (Manifest, error) {
+	return Manifest{}, nil
+}
+
+func (m Manifest) Converge() error {
+	for _, packrepo := range m.PackageRepos {
+		err := packrepo.Install()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, pack := range m.Packages {
+		err := pack.Install()
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

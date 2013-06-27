@@ -1,0 +1,17 @@
+{
+  "package_repositories": 
+    [
+  {
+    "name": "pgdg",
+    "uri": "http://apt.postgresql.org/pub/repos/apt/",
+    "distribution": "precise-pgdg",
+    "components": ["main"],
+    "gpg_key_uri": "http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc"
+  }
+  ],
+  "packages": [
+    {"name": "postgresql-9.2"},
+    {"name": "pgbouncer"},
+    {"name": "pgadmin3"}
+  ]
+}
