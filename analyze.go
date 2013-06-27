@@ -1,7 +1,6 @@
 package stackgo
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,29 +10,29 @@ import (
 )
 
 func download(uri string) (string, error) {
-		f, err := ioutil.TempFile("", "download")
+	f, err := ioutil.TempFile("", "download")
 
-		if err != nil {
-			return "", err
-		}
+	if err != nil {
+		return "", err
+	}
 
-		defer f.Close()
+	defer f.Close()
 
-		resp, err := http.Get(uri)
+	resp, err := http.Get(uri)
 
-		if err != nil {
-			return "", err
-		}
+	if err != nil {
+		return "", err
+	}
 
-		defer resp.Body.Close()
+	defer resp.Body.Close()
 
-		_, err = io.Copy(f, resp.Body)
+	_, err = io.Copy(f, resp.Body)
 
-		if err != nil {
-			return "",err
-		}
+	if err != nil {
+		return "", err
+	}
 
-		return f.Name(), nil
+	return f.Name(), nil
 
 }
 
@@ -68,7 +67,13 @@ func (pr *PackageRepository) Path() string {
 
 func (pr *PackageRepository) Entry() string {
 	// TODO: Add component support
-	return fmt.Sprintf("deb %s %s main", pr.Uri, pr.Distribution)
+	entry := "deb " + pr.Uri + " " + pr.Distribution
+
+	for _, component := range pr.Components {
+		entry = entry + " " + component
+	}
+
+	return entry
 }
 
 // Return created, error
@@ -90,8 +95,6 @@ func (pr *PackageRepository) InstallSourceList() (bool, error) {
 	return false, nil
 }
 
-
-
 func (pr *PackageRepository) InstallKey() error {
 	// TODO: Figure out cache module
 	keyPath, err := download(pr.KeyURI)
@@ -112,7 +115,6 @@ func (pr *PackageRepository) InstallKey() error {
 	return nil
 }
 
-
 func (pr *PackageRepository) Install() error {
 	source_added, err := pr.InstallSourceList()
 
@@ -121,7 +123,7 @@ func (pr *PackageRepository) Install() error {
 	}
 
 	//Fix this
-	if !source_added  {
+	if !source_added {
 		return nil
 	}
 
