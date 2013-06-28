@@ -175,6 +175,12 @@ func (t *Template) Create() error {
 		return err
 	}
 
+	err = os.MkdirAll(filepath.Dir(t.Path), 0777)
+
+	if err != nil {
+		return err
+	}
+
 	handle, err := os.Create(t.Path)
 
 	if err != nil {

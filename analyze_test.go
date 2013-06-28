@@ -55,7 +55,7 @@ func TestTemplate(t *testing.T) {
 	}
 
 	tmpl := Template{
-		Path:   "test.txt",
+		Path:   "output/test.txt",
 		Source: "fixtures/template.txt",
 		Data:   data,
 	}
