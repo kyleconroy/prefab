@@ -1,39 +1,68 @@
 package stackgo
 
 import (
+	"io/ioutil"
 	"testing"
 )
 
-func TestPackageRepositoryPath(t *testing.T) {
-	repo := PackageRepository{
+func TestSourceListPath(t *testing.T) {
+	slist := SourceList{
 		Filename: "foo.list",
 	}
 
-	if repo.Path() != "/etc/apt/sources.list.d/foo.list" {
-		t.Fatal("Path not equal", repo.Path())
+	if slist.Path() != "/etc/apt/sources.list.d/foo.list" {
+		t.Fatal("Path not equal", slist.Path())
 	}
 }
 
 func TestParseSourceList(t *testing.T) {
-	packrepo, err := ParseSourceList("fixtures/test.list")
+	slist, err := ParseSourceList("fixtures/test.list")
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if packrepo.Filename != "test.list" {
-		t.Fatalf("Source list filename: %s not %s", packrepo.Filename, "test")
+	if slist.Filename != "test.list" {
+		t.Fatalf("Source list filename: %s not %s", slist.Filename, "test")
 	}
 }
 
-func TestPackageRepositorySource(t *testing.T) {
-	repo := PackageRepository{
+func TestSource(t *testing.T) {
+	source := Source{
 		Uri:          "http://example.com",
 		Distribution: "precise-foo",
 		Components:   []string{"main", "foo"},
 	}
 
-	if repo.Entry() != "deb http://example.com precise-foo main foo" {
-		t.Fatal("Path not equal", repo.Path())
+	if source.Entry() != "deb http://example.com precise-foo main foo" {
+		t.Fatal("Source entry incorrect: ", source.Entry())
+	}
+}
+
+func TestTemplate(t *testing.T) {
+	data := map[string]interface{}{
+		"bat": "bar",
+	}
+
+	tmpl := Template{
+		Path:   "test.txt",
+		Source: "fixtures/template.txt",
+		Data:   data,
+	}
+
+	err := tmpl.Create()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents, err := ioutil.ReadFile(tmpl.Path)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(contents) != "value: bar\n" {
+		t.Fatal("File contents:", string(contents))
 	}
 }

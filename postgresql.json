@@ -1,18 +1,25 @@
 {
-  "package_repositories": 
-    [
-  {
+  "source_lists": [{
     "filename": "pgdg.list",
-    "uri": "http://apt.postgresql.org/pub/repos/apt/",
-    "distribution": "precise-pgdg",
-    "components": ["main"],
-    "gpg_key_uri": "http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc"
-  }
-  ],
+    "key_uri": "http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc",
+    "sources": [{
+      "uri": "http://apt.postgresql.org/pub/repos/apt/",
+      "distribution": "precise-pgdg",
+      "components": ["main"]
+    }]
+  }],
   "packages": [
-    {"name": "git-core"},
+    {"name": "git"},
     {"name": "postgresql-9.2"},
     {"name": "pgbouncer"},
     {"name": "pgadmin3"}
+  ],
+  "templates": [
+    {
+      "path": "/var/lib/foo.txt",
+      "source": "templates/foo.txt",
+      "data": { "bat": "bad" },
+      "mode": "",
+    }
   ]
 }

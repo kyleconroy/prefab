@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"text/template"
 )
 
 func download(uri string) (string, error) {
@@ -44,48 +45,59 @@ type Package struct {
 }
 
 func (p Package) Install() error {
-	log.Println("Install package: ", p.Name)
+	log.Println("Install package:", p.Name)
 
 	out, err := exec.Command("apt-get", "install", "-y", p.Name).Output()
 
 	if err != nil {
-		log.Println(out)
+		log.Println(string(out))
 	}
 
 	return err
 }
 
-type PackageRepository struct {
-	Filename     string   `json:"filename"`
+type Source struct {
 	Uri          string   `json:"uri"`
 	Distribution string   `json:"distribution"`
-	KeyURI       string   `json:"gpg_key_uri"`
 	Components   []string `json:"components"`
 }
 
-func (pr *PackageRepository) Path() string {
-	return "/etc/apt/sources.list.d/" + pr.Filename
-}
-
-func (pr *PackageRepository) Entry() string {
+func (s *Source) Entry() string {
 	// TODO: Add component support
-	entry := "deb " + pr.Uri + " " + pr.Distribution
+	entry := "deb " + s.Uri + " " + s.Distribution
 
-	for _, component := range pr.Components {
+	for _, component := range s.Components {
 		entry = entry + " " + component
 	}
 
 	return entry
 }
 
+type SourceList struct {
+	Filename string   `json:"filename"`
+	KeyURI   string   `json:"key_uri"`
+	Sources  []Source `json:"sources"`
+}
+
+func (sl *SourceList) Path() string {
+	return "/etc/apt/sources.list.d/" + sl.Filename
+}
+
 // Return created, error
-func (pr *PackageRepository) InstallSourceList() (bool, error) {
-	_, err := os.Stat(pr.Path())
+func (sl *SourceList) InstallSources() (bool, error) {
+	log.Println("Install source list")
+
+	_, err := os.Stat(sl.Path())
 
 	if os.IsNotExist(err) {
-		log.Println("Install source list")
 
-		err = ioutil.WriteFile(pr.Path(), []byte(pr.Entry()), 0644)
+		var body string
+
+		for _, source := range sl.Sources {
+			body = body + source.Entry() + "\n"
+		}
+
+		err = ioutil.WriteFile(sl.Path(), []byte(body), 0644)
 
 		if err != nil {
 			return false, err
@@ -97,13 +109,13 @@ func (pr *PackageRepository) InstallSourceList() (bool, error) {
 	return false, nil
 }
 
-func (pr *PackageRepository) InstallKey() error {
-	if pr.KeyURI == "" {
+func (sl *SourceList) InstallKey() error {
+	if sl.KeyURI == "" {
 		return nil
 	}
 
 	// TODO: Figure out cache module
-	keyPath, err := download(pr.KeyURI)
+	keyPath, err := download(sl.KeyURI)
 
 	if err != nil {
 		return err
@@ -121,8 +133,8 @@ func (pr *PackageRepository) InstallKey() error {
 	return nil
 }
 
-func (pr *PackageRepository) Install() error {
-	source_added, err := pr.InstallSourceList()
+func (sl *SourceList) Install() error {
+	source_added, err := sl.InstallSources()
 
 	if err != nil {
 		return err
@@ -133,7 +145,7 @@ func (pr *PackageRepository) Install() error {
 		return nil
 	}
 
-	err = pr.InstallKey()
+	err = sl.InstallKey()
 
 	if err != nil {
 		return err
@@ -149,16 +161,39 @@ func (pr *PackageRepository) Install() error {
 	return nil
 }
 
-type Manifest struct {
-	PackageRepos []PackageRepository `json:"package_repositories"`
-	Packages     []Package           `json:"packages"`
+type Template struct {
+	Path   string                 `json:"path"`
+	Source string                 `json:"source"`
+	Data   map[string]interface{} `json:"data"`
+	Mode   uint64                 `json:"mode"`
 }
 
-func ParseSourceList(path string) (PackageRepository, error) {
+func (t *Template) Create() error {
+	tmpl, err := template.ParseFiles(t.Source)
+
+	if err != nil {
+		return err
+	}
+
+	handle, err := os.Create(t.Path)
+
+	if err != nil {
+		return err
+	}
+
+	return tmpl.Execute(handle, t.Data)
+}
+
+type Manifest struct {
+	SourceLists []SourceList `json:"source_lists"`
+	Packages    []Package    `json:"packages"`
+}
+
+func ParseSourceList(path string) (SourceList, error) {
 	b, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		return PackageRepository{}, err
+		return SourceList{}, err
 	}
 
 	// TODO: Support more than one line
@@ -166,11 +201,15 @@ func ParseSourceList(path string) (PackageRepository, error) {
 	entry := lines[0]
 	parts := strings.Split(entry, " ")
 
-	return PackageRepository{
-		Filename:     filepath.Base(path),
+	source := Source{
 		Uri:          parts[1],
 		Distribution: parts[2],
 		Components:   []string{parts[3]}, //TODO: Figure out how slices work
+	}
+
+	return SourceList{
+		Filename: filepath.Base(path),
+		Sources:  []Source{source},
 	}, nil
 }
 
@@ -187,8 +226,8 @@ func Analyze() (Manifest, error) {
 }
 
 func (m Manifest) Converge() error {
-	for _, packrepo := range m.PackageRepos {
-		err := packrepo.Install()
+	for _, slist := range m.SourceLists {
+		err := slist.Install()
 
 		if err != nil {
 			return err
