@@ -13,6 +13,16 @@ func main() {
 
 	manifests := []stackgo.Manifest{}
 
+	if len(flag.Args()) == 0 {
+		_, err := stackgo.Analyze()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return
+	}
+
 	for _, path := range flag.Args() {
 		contents, err := ioutil.ReadFile(path)
 

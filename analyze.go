@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 func download(uri string) (string, error) {
@@ -54,7 +56,7 @@ func (p Package) Install() error {
 }
 
 type PackageRepository struct {
-	Name         string   `json:"name"`
+	Filename     string   `json:"filename"`
 	Uri          string   `json:"uri"`
 	Distribution string   `json:"distribution"`
 	KeyURI       string   `json:"gpg_key_uri"`
@@ -62,7 +64,7 @@ type PackageRepository struct {
 }
 
 func (pr *PackageRepository) Path() string {
-	return "/etc/apt/sources.list.d/" + pr.Name + ".list"
+	return "/etc/apt/sources.list.d/" + pr.Filename
 }
 
 func (pr *PackageRepository) Entry() string {
@@ -96,6 +98,10 @@ func (pr *PackageRepository) InstallSourceList() (bool, error) {
 }
 
 func (pr *PackageRepository) InstallKey() error {
+	if pr.KeyURI == "" {
+		return nil
+	}
+
 	// TODO: Figure out cache module
 	keyPath, err := download(pr.KeyURI)
 
@@ -148,7 +154,35 @@ type Manifest struct {
 	Packages     []Package           `json:"packages"`
 }
 
+func ParseSourceList(path string) (PackageRepository, error) {
+	b, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		return PackageRepository{}, err
+	}
+
+	// TODO: Support more than one line
+	lines := strings.Split(string(b), "\n")
+	entry := lines[0]
+	parts := strings.Split(entry, " ")
+
+	return PackageRepository{
+		Filename:     filepath.Base(path),
+		Uri:          parts[1],
+		Distribution: parts[2],
+		Components:   []string{parts[3]}, //TODO: Figure out how slices work
+	}, nil
+}
+
 func Analyze() (Manifest, error) {
+	path := "/etc/apt/sources.list.d"
+
+	_, err := ioutil.ReadDir(path)
+
+	if err != nil {
+		return Manifest{}, err
+	}
+
 	return Manifest{}, nil
 }
 

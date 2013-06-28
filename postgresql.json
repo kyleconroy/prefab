@@ -2,7 +2,7 @@
   "package_repositories": 
     [
   {
-    "name": "pgdg",
+    "filename": "pgdg.list",
     "uri": "http://apt.postgresql.org/pub/repos/apt/",
     "distribution": "precise-pgdg",
     "components": ["main"],
@@ -10,6 +10,7 @@
   }
   ],
   "packages": [
+    {"name": "git-core"},
     {"name": "postgresql-9.2"},
     {"name": "pgbouncer"},
     {"name": "pgadmin3"}
