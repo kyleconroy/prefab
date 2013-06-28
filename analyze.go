@@ -196,20 +196,33 @@ func ParseSourceList(path string) (SourceList, error) {
 		return SourceList{}, err
 	}
 
-	// TODO: Support more than one line
-	lines := strings.Split(string(b), "\n")
-	entry := lines[0]
-	parts := strings.Split(entry, " ")
+	var sources []Source
 
-	source := Source{
-		Uri:          parts[1],
-		Distribution: parts[2],
-		Components:   []string{parts[3]}, //TODO: Figure out how slices work
+	for _, line := range strings.Split(string(b), "\n") {
+		parts := strings.Split(line, " ")
+
+		if len(parts) < 4 {
+			// Incorrect source line
+			continue
+		}
+
+		if parts[0] != "deb" {
+			// Unsupported source line
+			continue
+		}
+
+		source := Source{
+			Uri:          parts[1],
+			Distribution: parts[2],
+			Components:   parts[:3],
+		}
+
+		sources = append(sources, source)
 	}
 
 	return SourceList{
 		Filename: filepath.Base(path),
-		Sources:  []Source{source},
+		Sources:  sources,
 	}, nil
 }
 

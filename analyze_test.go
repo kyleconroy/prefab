@@ -25,6 +25,16 @@ func TestParseSourceList(t *testing.T) {
 	if slist.Filename != "test.list" {
 		t.Fatalf("Source list filename: %s not %s", slist.Filename, "test")
 	}
+
+	if len(slist.Sources) != 2 {
+		t.Fatal("Didn't parse the correct number of sources")
+	}
+
+	source := slist.Sources[1]
+
+	if source.Uri != "http://apt.postgresql.org/pub/repos/apt/" {
+		t.Fatal("Incorrect source uri")
+	}
 }
 
 func TestSource(t *testing.T) {
