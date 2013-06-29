@@ -1,6 +1,7 @@
 package stackgo
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -85,7 +86,7 @@ func (sl *SourceList) Path() string {
 
 // Return created, error
 func (sl *SourceList) InstallSources() (bool, error) {
-	log.Println("Install source list")
+	log.Println("Install source list: ", sl.Path())
 
 	_, err := os.Stat(sl.Path())
 
@@ -133,32 +134,25 @@ func (sl *SourceList) InstallKey() error {
 	return nil
 }
 
-func (sl *SourceList) Install() error {
+func (sl *SourceList) Install() (bool, error) {
 	source_added, err := sl.InstallSources()
 
 	if err != nil {
-		return err
+		return source_added, err
 	}
 
 	//Fix this
 	if !source_added {
-		return nil
+		return false, nil
 	}
 
 	err = sl.InstallKey()
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	out, err := exec.Command("apt-get", "update").Output()
-
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
-
-	return nil
+	return true, nil
 }
 
 type Template struct {
@@ -190,9 +184,41 @@ func (t *Template) Create() error {
 	return tmpl.Execute(handle, t.Data)
 }
 
+type PersonalPackageArchive struct {
+	Owner string `json:"owner"`
+	Name  string `json:"name"`
+}
+
+func (ppa *PersonalPackageArchive) Path() string {
+	return fmt.Sprintf("/etc/apt/sources.list.d/%s-%s-precise.list", ppa.Owner, ppa.Name)
+}
+
+func (ppa *PersonalPackageArchive) Install() (bool, error) {
+	_, err := os.Stat(ppa.Path())
+
+	id := fmt.Sprintf("ppa:%s/%s", ppa.Owner, ppa.Name)
+
+	log.Println("Install ppa: ", id)
+
+	if os.IsNotExist(err) {
+		out, err := exec.Command("add-apt-repository", "-y", id).Output()
+
+		if err != nil {
+			log.Println(string(out))
+			return false, err
+		}
+
+		return true, nil
+	}
+
+	return false, nil
+}
+
 type Manifest struct {
-	SourceLists []SourceList `json:"source_lists"`
-	Packages    []Package    `json:"packages"`
+	SourceLists     []SourceList             `json:"source_lists"`
+	Packages        []Package                `json:"packages"`
+	Templates       []Template               `json:"templates"`
+	PackageArchives []PersonalPackageArchive `json:"personal_package_archives"`
 }
 
 func ParseSourceList(path string) (SourceList, error) {
@@ -245,10 +271,49 @@ func Analyze() (Manifest, error) {
 }
 
 func (m Manifest) Converge() error {
+	apt_update_needed := false
+
 	for _, slist := range m.SourceLists {
-		err := slist.Install()
+		created, err := slist.Install()
 
 		if err != nil {
+			return err
+		}
+
+		if created {
+			apt_update_needed = true
+		}
+	}
+
+	// If there are Personal Package Archives to install,
+	// make sure that the `add-apt-repository` command is available
+	if len(m.PackageArchives) > 0 {
+		pkg := Package{Name: "python-software-properties"}
+		err := pkg.Install()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, ppa := range m.PackageArchives {
+		created, err := ppa.Install()
+
+		if err != nil {
+			return err
+		}
+
+		if created {
+			apt_update_needed = true
+		}
+	}
+
+	// Replace this with notifications eventually
+	if apt_update_needed {
+		out, err := exec.Command("apt-get", "update").Output()
+
+		if err != nil {
+			log.Println(string(out))
 			return err
 		}
 	}

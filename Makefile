@@ -1,4 +1,4 @@
-.PHONY: build test fmt
+.PHONY: build test fmt run
 
 GOPATH = $(HOME)/gopath
 export GOPATH
@@ -7,9 +7,15 @@ export GOPATH
 fmt:
 	gofmt -l -w .
 
-build:
+build: fmt
 	go build -o stack cli/main.go
 
-run:
+run: fmt
 	go run cli/main.go analyze
+
+test: fmt
+	go test
+
+converge:
+	go run cli/main.go postgresql.json
 

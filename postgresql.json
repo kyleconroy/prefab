@@ -8,7 +8,12 @@
       "components": ["main"]
     }]
   }],
+  "personal_package_archives": [
+    {"name": "redis", "owner": "rwky"},
+    {"name": "deadsnakes", "owner": "fkrull"}
+  ],
   "packages": [
+    {"name": "build-essential"},
     {"name": "git"},
     {"name": "postgresql-9.2"},
     {"name": "pgbouncer"},
@@ -19,7 +24,7 @@
       "path": "/var/lib/foo.txt",
       "source": "templates/foo.txt",
       "data": { "bat": "bad" },
-      "mode": "",
+      "mode": 644
     }
   ]
 }

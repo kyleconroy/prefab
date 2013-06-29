@@ -76,3 +76,11 @@ func TestTemplate(t *testing.T) {
 		t.Fatal("File contents:", string(contents))
 	}
 }
+
+func TestPPA(t *testing.T) {
+	ppa := PersonalPackageArchive{Name: "foo", Owner: "bar"}
+
+	if ppa.Path() != "/etc/apt/sources.list.d/bar-foo-precise.list" {
+		t.Fatal("PPA path is incorrect:", ppa.Path())
+	}
+}
