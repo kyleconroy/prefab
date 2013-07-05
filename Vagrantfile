@@ -10,6 +10,6 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   config.ssh.forward_agent = true
-  config.vm.synced_folder "~/gopath", "/home/vagrant/gopath"
-  config.vm.provision :shell, :path => "installgo.sh"
+
+  config.vm.provision :shell, :path => "converge.sh"
 end

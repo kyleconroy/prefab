@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"time"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
@@ -54,6 +55,8 @@ func main() {
 		manifests = append(manifests, manifest)
 	}
 
+	start := time.Now()
+
 	for _, manifest := range manifests {
 		err := manifest.Converge()
 
@@ -61,4 +64,6 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+
+	log.Printf("Took %s", time.Since(start))
 }

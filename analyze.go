@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 )
 
 func download(uri string) (string, error) {
@@ -48,7 +49,24 @@ type Package struct {
 func (p Package) Install() error {
 	log.Println("Install package:", p.Name)
 
-	out, err := exec.Command("apt-get", "install", "-y", p.Name).Output()
+	out, err := exec.Command("apt-cache", "policy", "-q", p.Name).Output()
+
+	if err != nil {
+		log.Println(string(out))
+		return err
+	}
+
+	for _, line := range strings.Split(string(out), "\n") {
+		sline := strings.TrimSpace(line)
+
+		if strings.HasPrefix(sline, "Installed: ") {
+			if !strings.HasSuffix(sline, "(none)") {
+				return nil
+			}
+		}
+	}
+
+	out, err = exec.Command("apt-get", "install", "-y", p.Name).Output()
 
 	if err != nil {
 		log.Println(string(out))
@@ -270,7 +288,57 @@ func Analyze() (Manifest, error) {
 	return Manifest{}, nil
 }
 
+func (m Manifest) Begin() error {
+	err := os.MkdirAll("/var/stackgo", 0777)
+
+	if err != nil {
+		return err
+	}
+
+	info, err := os.Stat("/var/stackgo/apt-update")
+
+	if os.IsNotExist(err) {
+		_, err = os.Create("/var/stackgo/apt-update")
+
+		if err != nil {
+			return err
+		}
+
+		log.Println("Run `apt-get update`")
+		out, err := exec.Command("apt-get", "update").Output()
+
+		if err != nil {
+			log.Println(string(out))
+			return err
+		}
+
+		return nil
+	}
+
+	// If the ModTime on this file is older than a week, rerun
+	if info.ModTime().Before(time.Now().AddDate(0, 0, -7)) {
+
+		log.Println("Run `apt-get update`")
+		out, err := exec.Command("apt-get", "update").Output()
+
+		if err != nil {
+			log.Println(string(out))
+			return err
+		}
+
+	}
+
+	return nil
+
+}
+
 func (m Manifest) Converge() error {
+	err := m.Begin()
+
+	if err != nil {
+		return err
+	}
+
 	apt_update_needed := false
 
 	for _, slist := range m.SourceLists {
@@ -310,6 +378,7 @@ func (m Manifest) Converge() error {
 
 	// Replace this with notifications eventually
 	if apt_update_needed {
+		log.Println("Run `apt-get update`")
 		out, err := exec.Command("apt-get", "update").Output()
 
 		if err != nil {
