@@ -8,10 +8,6 @@
       "components": ["main"]
     }]
   }],
-  "personal_package_archives": [
-    {"name": "redis", "owner": "rwky"},
-    {"name": "deadsnakes", "owner": "fkrull"}
-  ],
   "packages": [
     {"name": "build-essential"},
     {"name": "git"},

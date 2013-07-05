@@ -1,0 +1,8 @@
+{
+  "personal_package_archives": [
+    {"name": "deadsnakes", "owner": "fkrull"}
+  ],
+  "packages": [
+    {"name": "python3.3"}
+  ]
+}

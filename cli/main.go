@@ -25,17 +25,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	manifests := []stackgo.Manifest{}
-
-	if len(flag.Args()) == 0 {
-		_, err := stackgo.Analyze()
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return
-	}
+	var manifest stackgo.Manifest
 
 	for _, path := range flag.Args() {
 		contents, err := ioutil.ReadFile(path)
@@ -44,25 +34,23 @@ func main() {
 			log.Fatal(err)
 		}
 
-		var manifest stackgo.Manifest
+		var userManifest stackgo.Manifest
 
-		err = json.Unmarshal(contents, &manifest)
+		err = json.Unmarshal(contents, &userManifest)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		manifests = append(manifests, manifest)
+		manifest.Add(userManifest)
 	}
 
 	start := time.Now()
 
-	for _, manifest := range manifests {
-		err := manifest.Converge()
+	err := manifest.Converge()
 
-		if err != nil {
-			log.Fatal(err)
-		}
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	log.Printf("Took %s", time.Since(start))

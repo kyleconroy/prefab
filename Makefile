@@ -7,11 +7,8 @@ build: fmt
 	go build -o stack cli/main.go
 
 run: fmt
-	go run cli/main.go postgresql.json
+	go run cli/main.go manifests/postgresql.json
 
 test: fmt
 	go test
-
-converge:
-	go run cli/main.go postgresql.json
 

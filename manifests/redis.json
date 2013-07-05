@@ -1,0 +1,10 @@
+{
+  "personal_package_archives": [
+    {"name": "redis", "owner": "rwky"}
+  ],
+  "packages": [
+    {"name": "redis-server"}
+  ]
+}
+ 
+

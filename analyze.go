@@ -397,3 +397,10 @@ func (m Manifest) Converge() error {
 
 	return nil
 }
+
+func (m *Manifest) Add(other Manifest) {
+	m.SourceLists = append(m.SourceLists, other.SourceLists...)
+	m.Packages = append(m.Packages, other.Packages...)
+	m.Templates = append(m.Templates, other.Templates...)
+	m.PackageArchives = append(m.PackageArchives, other.PackageArchives...)
+}
