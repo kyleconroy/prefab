@@ -29,14 +29,6 @@
       "path": "/etc/pgbouncer/pgbouncer.ini",
       "source": "postgresql/templates/pgbouncer.ini",
       "mode": 644
-    },
-    {
-      "path": "/etc/pgbouncer/userlist.txt",
-      "source": "postgresql/templates/userlist.txt",
-      "mode": 644,
-      "data": {
-        "users": [{"name": "postgres", "password": "postgres"}]
-      }
     }
   ],
   "services": [
