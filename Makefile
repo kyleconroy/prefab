@@ -4,7 +4,7 @@ fmt:
 	gofmt -l -w .
 
 build: fmt
-	go build -o stack cli/main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o stack cli/main.go
 
 run: fmt
 	go run cli/main.go postgresql/manifest.json
