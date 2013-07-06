@@ -1,0 +1,49 @@
+{
+  "source_lists": [{
+    "filename": "pgdg.list",
+    "key_uri": "http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc",
+    "sources": [{
+      "uri": "http://apt.postgresql.org/pub/repos/apt/",
+      "distribution": "precise-pgdg",
+      "components": ["main"]
+    }]
+  }],
+  "packages": [
+    {"name": "postgresql-9.2"},
+    {"name": "postgresql-client-9.2"},
+    {"name": "postgresql-contrib-9.2"},
+    {"name": "pgbouncer"}
+  ],
+  "templates": [
+    {
+      "path": "/etc/postgresql/9.2/main/pg_hba.conf",
+      "source": "postgresql/templates/pg_hba.conf",
+      "mode": 644
+    },
+    {
+      "path": "/etc/postgresql/9.2/main/postgresql.conf",
+      "source": "postgresql/templates/postgresql.conf",
+      "mode": 644
+    },
+    {
+      "path": "/etc/pgbouncer/pgbouncer.ini",
+      "source": "postgresql/templates/pgbouncer.ini",
+      "mode": 644
+    },
+    {
+      "path": "/etc/pgbouncer/userlist.txt",
+      "source": "postgresql/templates/userlist.txt",
+      "mode": 644,
+      "data": {
+        "users": [{"name": "postgres", "password": "postgres"}]
+      }
+    }
+  ],
+  "services": [
+    {"name": "postgresql"},
+    {"name": "pgbouncer"}
+  ],
+  "users": [
+    {"name": "postgres", "password": "postgres"}
+  ]
+}

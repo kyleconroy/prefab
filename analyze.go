@@ -41,6 +41,32 @@ func download(uri string) (string, error) {
 
 }
 
+type User struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+func (u User) Create() error {
+	log.Println("Create user:", u.Name)
+	return nil
+}
+
+type Service struct {
+	Name string `json:"name"`
+}
+
+func (s Service) Create() error {
+	log.Println("Start service:", s.Name)
+	out, err := exec.Command("service", s.Name, "start").Output()
+
+	if err != nil {
+		log.Println(string(out))
+		return err
+	}
+
+	return nil
+}
+
 type Package struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
@@ -104,7 +130,7 @@ func (sl *SourceList) Path() string {
 
 // Return created, error
 func (sl *SourceList) InstallSources() (bool, error) {
-	log.Println("Install source list: ", sl.Path())
+	log.Println("Install archive:", sl.Path())
 
 	_, err := os.Stat(sl.Path())
 
@@ -181,6 +207,8 @@ type Template struct {
 }
 
 func (t *Template) Create() error {
+	log.Println("Create file:", t.Path)
+
 	tmpl, err := template.ParseFiles(t.Source)
 
 	if err != nil {
@@ -216,7 +244,7 @@ func (ppa *PersonalPackageArchive) Install() (bool, error) {
 
 	id := fmt.Sprintf("ppa:%s/%s", ppa.Owner, ppa.Name)
 
-	log.Println("Install ppa: ", id)
+	log.Println("Install archive:", id)
 
 	if os.IsNotExist(err) {
 		out, err := exec.Command("add-apt-repository", "-y", id).Output()
@@ -237,6 +265,8 @@ type Manifest struct {
 	Packages        []Package                `json:"packages"`
 	Templates       []Template               `json:"templates"`
 	PackageArchives []PersonalPackageArchive `json:"personal_package_archives"`
+	Users           []User                   `json:"users"`
+	Services        []Service                `json:"services"`
 }
 
 func ParseSourceList(path string) (SourceList, error) {
@@ -333,6 +363,14 @@ func (m Manifest) Begin() error {
 }
 
 func (m Manifest) Converge() error {
+	for _, user := range m.Users {
+		err := user.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	err := m.Begin()
 
 	if err != nil {
@@ -395,6 +433,22 @@ func (m Manifest) Converge() error {
 		}
 	}
 
+	for _, tmpl := range m.Templates {
+		err := tmpl.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, service := range m.Services {
+		err := service.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -403,4 +457,6 @@ func (m *Manifest) Add(other Manifest) {
 	m.Packages = append(m.Packages, other.Packages...)
 	m.Templates = append(m.Templates, other.Templates...)
 	m.PackageArchives = append(m.PackageArchives, other.PackageArchives...)
+	m.Users = append(m.Users, other.Users...)
+	m.Services = append(m.Services, other.Services...)
 }

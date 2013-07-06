@@ -1,0 +1,1 @@
+{{ range .users }}"{{ .name }}" "{{ .password }}"{{ end }}
