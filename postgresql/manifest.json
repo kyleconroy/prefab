@@ -43,7 +43,10 @@
     {"name": "postgresql"},
     {"name": "pgbouncer"}
   ],
-  "users": [
+  "postgres_users": [
     {"name": "postgres", "password": "postgres"}
+  ],
+  "postgres_databases": [
+    {"name": "bench"}
   ]
 }
