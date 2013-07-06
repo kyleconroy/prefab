@@ -5,8 +5,30 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
+
+type Database struct {
+	Name string `json:"name"`
+}
+
+func (d Database) Create() error {
+	log.Println("Create database:", d.Name)
+
+	out, err := exec.Command("sudo", "-u", "postgres", "createdb", d.Name).CombinedOutput()
+
+	if strings.HasSuffix(strings.TrimSpace(string(out)), "already exists") {
+		return nil
+	}
+
+	if err != nil {
+		log.Println(string(out))
+		return err
+	}
+
+	return nil
+}
 
 type Manifest struct {
 	SourceLists     []SourceList             `json:"source_lists"`
@@ -15,6 +37,7 @@ type Manifest struct {
 	PackageArchives []PersonalPackageArchive `json:"personal_package_archives"`
 	Users           []User                   `json:"users"`
 	Services        []Service                `json:"services"`
+	Databases       []Database               `json:"postgres_databases"`
 }
 
 func Analyze() (Manifest, error) {
@@ -46,7 +69,7 @@ func (m Manifest) Begin() error {
 		}
 
 		log.Println("Run `apt-get update`")
-		out, err := exec.Command("apt-get", "update").Output()
+		out, err := exec.Command("apt-get", "update").CombinedOutput()
 
 		if err != nil {
 			log.Println(string(out))
@@ -60,7 +83,7 @@ func (m Manifest) Begin() error {
 	if info.ModTime().Before(time.Now().AddDate(0, 0, -7)) {
 
 		log.Println("Run `apt-get update`")
-		out, err := exec.Command("apt-get", "update").Output()
+		out, err := exec.Command("apt-get", "update").CombinedOutput()
 
 		if err != nil {
 			log.Println(string(out))
@@ -128,7 +151,7 @@ func (m Manifest) Converge() error {
 	// Replace this with notifications eventually
 	if apt_update_needed {
 		log.Println("Run `apt-get update`")
-		out, err := exec.Command("apt-get", "update").Output()
+		out, err := exec.Command("apt-get", "update").CombinedOutput()
 
 		if err != nil {
 			log.Println(string(out))
@@ -160,6 +183,14 @@ func (m Manifest) Converge() error {
 		}
 	}
 
+	for _, db := range m.Databases {
+		err := db.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -170,4 +201,5 @@ func (m *Manifest) Add(other Manifest) {
 	m.PackageArchives = append(m.PackageArchives, other.PackageArchives...)
 	m.Users = append(m.Users, other.Users...)
 	m.Services = append(m.Services, other.Services...)
+	m.Databases = append(m.Databases, other.Databases...)
 }
