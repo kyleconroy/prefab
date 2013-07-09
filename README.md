@@ -1,5 +1,7 @@
 # stackgo
 
+[![Build Status](https://travis-ci.org/stackmachine/stackgo.png?branch=master)](https://travis-ci.org/stackmachine/stackgo)
+
 Configuration management you'll actually use
 
 `stackgo` takes a different approach than other configuration management
