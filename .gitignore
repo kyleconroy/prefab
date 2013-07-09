@@ -22,4 +22,7 @@ _testmain.go
 *.exe
 
 stack
+stackgo/test
 output
+
+.vagrant

@@ -2,6 +2,7 @@ package stackgo
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -10,13 +11,25 @@ func TestTemplate(t *testing.T) {
 		"bat": "bar",
 	}
 
+	err := os.MkdirAll("test", 0777)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = ioutil.WriteFile("test/template.txt", []byte("value: {{ .bat }}"), 0644)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tmpl := Template{
-		Path:   "output/test.txt",
-		Source: "fixtures/template.txt",
+		Path:   "test/template_output.txt",
+		Source: "test/template.txt",
 		Data:   data,
 	}
 
-	err := tmpl.Create()
+	err = tmpl.Create()
 
 	if err != nil {
 		t.Fatal(err)
@@ -28,7 +41,7 @@ func TestTemplate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if string(contents) != "value: bar\n" {
+	if string(contents) != "value: bar" {
 		t.Fatal("File contents:", string(contents))
 	}
 }

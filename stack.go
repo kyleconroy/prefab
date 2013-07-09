@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/stackmachine/stackgo"
+	"github.com/stackmachine/stackgo/stackgo"
 	"io/ioutil"
 	"log"
 	"os"

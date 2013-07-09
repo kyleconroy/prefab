@@ -11,5 +11,5 @@ Vagrant.configure("2") do |config|
 
   config.ssh.forward_agent = true
 
-  config.vm.provision :shell, :path => "converge.sh"
+  config.vm.provision :shell, :path => "scripts/converge.sh"
 end

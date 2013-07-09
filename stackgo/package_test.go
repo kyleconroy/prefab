@@ -1,6 +1,8 @@
 package stackgo
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -15,7 +17,23 @@ func TestSourceListPath(t *testing.T) {
 }
 
 func TestParseSourceList(t *testing.T) {
-	slist, err := ParseSourceList("fixtures/test.list")
+	err := os.MkdirAll("test", 0777)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	srclist := `deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main
+deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg universe foo
+deb-src http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main`
+
+	err = ioutil.WriteFile("test/test.list", []byte(srclist), 0644)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	slist, err := ParseSourceList("test/test.list")
 
 	if err != nil {
 		t.Fatal(err)

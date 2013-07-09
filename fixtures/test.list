@@ -1,4 +1,0 @@
-deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main
-deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg universe foo
-deb-src http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main
-
