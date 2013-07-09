@@ -1,5 +1,8 @@
 .PHONY: build test fmt run
 
+test: fmt
+	go test
+
 fmt:
 	gofmt -l -w .
 
@@ -15,6 +18,4 @@ run: fmt
 stack.linux64.tar.gz: stack
 	tar -czf stack.linux64.tar.gz stack
 
-test: fmt
-	go test
 
