@@ -4,6 +4,9 @@
   ],
   "packages": [
     {"name": "redis-server"}
+  ],
+  "services": [
+    {"name": "redis-server"}
   ]
 }
  

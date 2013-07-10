@@ -11,8 +11,7 @@
   "packages": [
     {"name": "postgresql-9.2"},
     {"name": "postgresql-client-9.2"},
-    {"name": "postgresql-contrib-9.2"},
-    {"name": "pgbouncer"}
+    {"name": "postgresql-contrib-9.2"}
   ],
   "templates": [
     {
@@ -24,15 +23,9 @@
       "path": "/etc/postgresql/9.2/main/postgresql.conf",
       "source": "postgresql/templates/postgresql.conf",
       "mode": 644
-    },
-    {
-      "path": "/etc/pgbouncer/pgbouncer.ini",
-      "source": "postgresql/templates/pgbouncer.ini",
-      "mode": 644
     }
   ],
   "services": [
-    {"name": "postgresql"},
-    {"name": "pgbouncer"}
+    {"name": "postgresql"}
   ]
 }

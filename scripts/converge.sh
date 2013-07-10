@@ -1,8 +1,14 @@
 #!/bin/bash
-pushd /vagrant
+set -x
 
-./stack software/postgresql/manifest.json software/redis/manifest.json \
-	software/python/manifest.json
+pushd /vagrant/software
+
+./../stack postgresql/manifest.json redis/manifest.json \
+	python/manifest.json
 
 # DEVELOPMENT
+popd
+
+pushd /vagrant
 sh scripts/installgo.sh
+popd
