@@ -3,7 +3,6 @@ package stackgo
 import (
 	"log"
 	"os/exec"
-	"strings"
 )
 
 type Service struct {
@@ -14,12 +13,8 @@ func (s Service) Create() error {
 	log.Println("Start service:", s.Name)
 	out, err := exec.Command("service", s.Name, "status").CombinedOutput()
 
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
-
-	if strings.Contains(string(out), "start/running") {
+	if err == nil {
+		log.Println("service", s.Name, "running.")
 		return nil
 	}
 
