@@ -1,0 +1,5 @@
+{
+  "packages": [
+    {"name": "openjdk-6-jre"}
+  ]
+}
