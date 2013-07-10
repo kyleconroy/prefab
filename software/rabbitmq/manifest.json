@@ -1,0 +1,18 @@
+{
+  "source_lists": [{
+    "filename": "rabbitmq.list",
+    "key_uri": "http://www.rabbitmq.com/rabbitmq-signing-key-public.asc",
+    "sources": [{
+      "uri": "http://www.rabbitmq.com/debian/",
+      "distribution": "testing",
+      "components": ["main"]
+    }]
+  }],
+  "packages": [
+    {"name": "rabbitmq-server"}
+  ],
+  "services": [
+    {"name": "rabbitmq-server"}
+  ]
+}
+
