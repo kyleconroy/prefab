@@ -1,0 +1,9 @@
+{
+  "packages": [
+    {"name": "memcached"}
+  ],
+  "services": [
+    {"name": "memcached"}
+  ]
+}
+
