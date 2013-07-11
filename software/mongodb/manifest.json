@@ -1,0 +1,19 @@
+{
+  "source_lists": [{
+    "filename": "10gen.list",
+    "key_uri": "http://docs.mongodb.org/10gen-gpg-key.asc",
+    "sources": [{
+      "uri": "http://downloads-distro.mongodb.org/repo/ubuntu-upstart",
+      "distribution": "dist",
+      "components": ["10gen"]
+    }]
+  }],
+  "packages": [
+    {"name": "mongodb-10gen"}
+  ],
+  "services": [
+    {"name": "mongodb"}
+  ]
+}
+
+
