@@ -2,42 +2,13 @@ package stackgo
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
-
-func download(uri string) (string, error) {
-	f, err := ioutil.TempFile("", "download")
-
-	if err != nil {
-		return "", err
-	}
-
-	defer f.Close()
-
-	resp, err := http.Get(uri)
-
-	if err != nil {
-		return "", err
-	}
-
-	defer resp.Body.Close()
-
-	_, err = io.Copy(f, resp.Body)
-
-	if err != nil {
-		return "", err
-	}
-
-	return f.Name(), nil
-
-}
 
 type Package struct {
 	Name    string `json:"name"`

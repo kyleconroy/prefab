@@ -1,13 +1,41 @@
 package stackgo
 
 import (
+	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 )
+
+func download(uri string) (string, error) {
+	f, err := ioutil.TempFile("", "download")
+
+	if err != nil {
+		return "", err
+	}
+
+	defer f.Close()
+
+	resp, err := http.Get(uri)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	_, err = io.Copy(f, resp.Body)
+
+	if err != nil {
+		return "", err
+	}
+
+	return f.Name(), nil
+}
 
 type Database struct {
 	Name string `json:"name"`
@@ -35,7 +63,9 @@ type Manifest struct {
 	Packages        []Package                `json:"packages"`
 	Templates       []Template               `json:"templates"`
 	PackageArchives []PersonalPackageArchive `json:"personal_package_archives"`
+	Tarballs        []Tarball                `json:"tarballs"`
 	Users           []User                   `json:"users"`
+	Symlinks        []Symlink                `json:"symlinks"`
 	Services        []Service                `json:"services"`
 	Databases       []Database               `json:"postgres_databases"`
 }
@@ -167,8 +197,24 @@ func (m Manifest) Converge() error {
 		}
 	}
 
+	for _, tarball := range m.Tarballs {
+		err := tarball.Unpack()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, tmpl := range m.Templates {
 		err := tmpl.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, symlink := range m.Symlinks {
+		err := symlink.Create()
 
 		if err != nil {
 			return err
@@ -199,7 +245,9 @@ func (m *Manifest) Add(other Manifest) {
 	m.Packages = append(m.Packages, other.Packages...)
 	m.Templates = append(m.Templates, other.Templates...)
 	m.PackageArchives = append(m.PackageArchives, other.PackageArchives...)
+	m.Tarballs = append(m.Tarballs, other.Tarballs...)
 	m.Users = append(m.Users, other.Users...)
 	m.Services = append(m.Services, other.Services...)
 	m.Databases = append(m.Databases, other.Databases...)
+	m.Symlinks = append(m.Symlinks, other.Symlinks...)
 }
