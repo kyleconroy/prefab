@@ -1,11 +1,11 @@
 {
   "tarballs": [
     {"url":"https://s3.amazonaws.com/dl.stackmachine.com/ruby/ruby-2.0.0.tgz",
-     "destination":"/usr/local/ruby"}
+     "path":"/usr/local/ruby"}
   ],
   "symlinks": [
-    {"src":"/usr/local/ruby/bin/irb","dst":"/usr/local/bin/"},
-    {"src":"/usr/local/ruby/bin/ruby","dst":"/usr/local/bin/"}
+    {"source":"/usr/local/ruby/bin/ruby","destination":"/usr/local/bin/ruby"},
+    {"source":"/usr/local/ruby/bin/irb","destination":"/usr/local/bin/irb"}
   ],
   "packages": [
     {"name": "libssl0.9.8"},
