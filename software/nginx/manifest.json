@@ -1,0 +1,12 @@
+{
+  "personal_package_archives": [
+    {"name": "stable", "owner": "nginx"}
+  ],
+  "packages": [
+    {"name": "nginx"}
+  ],
+  "services": [
+    {"name": "nginx"}
+  ]
+}
+ 
