@@ -1,0 +1,27 @@
+{
+  "tarballs": [
+    {"url":"https://s3.amazonaws.com/dl.stackmachine.com/ruby/ruby-2.0.0.tgz",
+     "destination":"/usr/local/ruby"}
+  ],
+  "symlinks": [
+    {"src":"/usr/local/ruby/bin/irb","dst":"/usr/local/bin/"},
+    {"src":"/usr/local/ruby/bin/ruby","dst":"/usr/local/bin/"}
+  ],
+  "packages": [
+    {"name": "libssl0.9.8"},
+    {"name": "zlib1g"},
+    {"name": "zlib1g-dev"},
+    {"name": "zlib1g-dev"},
+    {"name": "libreadline6"},
+    {"name": "libreadline6-dev"},
+    {"name": "readline-common"}
+  ],
+  "templates":[
+    {
+      "path": "/etc/gemrc",
+      "source": "ruby/templates/gemrc",
+      "mode": 644
+    }
+  ]
+}
+
