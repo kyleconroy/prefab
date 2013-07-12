@@ -5,17 +5,11 @@
   ],
   "packages": [
     {"name": "libssl0.9.8"},
-    {"name": "zlib1g"},
-    {"name": "zlib1g-dev"},
-    {"name": "zlib1g-dev"},
-    {"name": "libreadline6"},
-    {"name": "libreadline6-dev"},
-    {"name": "readline-common"},
     {"name": "make"}
   ],
   "templates":[
     {
-      "path": "/etc/gemrc",
+      "path": "/app/vendor/ruby-2.0.0/etc/gemrc",
       "source": "ruby/templates/gemrc",
       "mode": 644
     },
