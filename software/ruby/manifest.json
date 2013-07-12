@@ -3,10 +3,6 @@
     {"url":"https://s3.amazonaws.com/dl.stackmachine.com/ruby/ruby-2.0.0.tgz",
      "path":"/usr/local/ruby"}
   ],
-  "symlinks": [
-    {"source":"/usr/local/ruby/bin/ruby","destination":"/usr/local/bin/ruby"},
-    {"source":"/usr/local/ruby/bin/irb","destination":"/usr/local/bin/irb"}
-  ],
   "packages": [
     {"name": "libssl0.9.8"},
     {"name": "zlib1g"},
@@ -14,12 +10,18 @@
     {"name": "zlib1g-dev"},
     {"name": "libreadline6"},
     {"name": "libreadline6-dev"},
-    {"name": "readline-common"}
+    {"name": "readline-common"},
+    {"name": "make"}
   ],
   "templates":[
     {
       "path": "/etc/gemrc",
       "source": "ruby/templates/gemrc",
+      "mode": 644
+    },
+    {
+      "path": "/etc/profile.d/system_ruby.sh",
+      "source": "ruby/templates/system_ruby.sh",
       "mode": 644
     }
   ]
