@@ -16,7 +16,13 @@ type Package struct {
 }
 
 func (p Package) Install() error {
-	log.Println("Install package:", p.Name)
+	var pkgName string
+	if p.Version != "" {
+		pkgName = fmt.Sprintf("%s=%s", p.Name, p.Version)
+	} else {
+		pkgName = p.Name
+	}
+	log.Println("Install package:", pkgName)
 
 	out, err := exec.Command("apt-cache", "policy", "-q", p.Name).Output()
 
@@ -35,7 +41,7 @@ func (p Package) Install() error {
 		}
 	}
 
-	out, err = exec.Command("apt-get", "install", "-y", p.Name).Output()
+	out, err = exec.Command("apt-get", "install", "-y", pkgName).Output()
 
 	if err != nil {
 		log.Println(string(out))
