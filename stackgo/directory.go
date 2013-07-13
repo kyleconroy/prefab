@@ -3,6 +3,7 @@ package stackgo
 import (
 	"log"
 	"os"
+	"syscall"
 )
 
 type Directory struct {
@@ -13,6 +14,8 @@ type Directory struct {
 func (d *Directory) Create() error {
 	log.Println("Create directory:", d.Path)
 
-	err := os.MkdirAll(d.Path, 0777)
+	oldMode := syscall.Umask(000)
+	err := os.MkdirAll(d.Path, os.ModeDir|0777)
+	syscall.Umask(oldMode)
 	return err
 }
