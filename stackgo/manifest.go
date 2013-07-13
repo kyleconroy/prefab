@@ -61,6 +61,7 @@ func (d Database) Create() error {
 type Manifest struct {
 	SourceLists     []SourceList             `json:"source_lists"`
 	Packages        []Package                `json:"packages"`
+	Directories     []Directory              `json:"directories"`
 	Templates       []Template               `json:"templates"`
 	PackageArchives []PersonalPackageArchive `json:"personal_package_archives"`
 	Tarballs        []Tarball                `json:"tarballs"`
@@ -205,6 +206,14 @@ func (m Manifest) Converge() error {
 		}
 	}
 
+	for _, dir := range m.Directories {
+		err := dir.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, tmpl := range m.Templates {
 		err := tmpl.Create()
 
@@ -243,6 +252,7 @@ func (m Manifest) Converge() error {
 func (m *Manifest) Add(other Manifest) {
 	m.SourceLists = append(m.SourceLists, other.SourceLists...)
 	m.Packages = append(m.Packages, other.Packages...)
+	m.Directories = append(m.Directories, other.Directories...)
 	m.Templates = append(m.Templates, other.Templates...)
 	m.PackageArchives = append(m.PackageArchives, other.PackageArchives...)
 	m.Tarballs = append(m.Tarballs, other.Tarballs...)

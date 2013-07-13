@@ -15,6 +15,8 @@ for all resources.
 3. Software Repositories (ppas, yum repos, apt repos)
 4. Packages
 5. Source Repositories (git, svn)
+5. Directories
 5. Templates
+6. Tarballs
 6. Services
 7. Databases
