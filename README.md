@@ -1,4 +1,4 @@
-# prefab - a basic configuration amanger
+# prefab - a basic configuration manager
 
 [![Build Status](https://travis-ci.org/stackmachine/prefab.png?branch=master)](https://travis-ci.org/stackmachine/prefab)
 
