@@ -6,8 +6,8 @@ fi
 
 mkdir -p /home/vagrant/go/src/github.com/stackmachine
 
-if [ ! -e /home/vagrant/go/src/github.com/stackmachine/stackgo ]; then
-	ln -s /vagrant /home/vagrant/go/src/github.com/stackmachine/stackgo
+if [ ! -e /home/vagrant/go/src/github.com/stackmachine/prefab ]; then
+	ln -s /vagrant /home/vagrant/go/src/github.com/stackmachine/prefab
 fi
 
 echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/go.sh

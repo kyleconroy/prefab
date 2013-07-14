@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/stackmachine/stackgo/stackgo"
+	"github.com/stackmachine/prefab/prefab"
 	"io/ioutil"
 	"log"
 	"os"
@@ -25,7 +25,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	var manifest stackgo.Manifest
+	var manifest prefab.Manifest
 
 	for _, path := range flag.Args() {
 		contents, err := ioutil.ReadFile(path)
@@ -34,7 +34,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		var userManifest stackgo.Manifest
+		var userManifest prefab.Manifest
 
 		err = json.Unmarshal(contents, &userManifest)
 

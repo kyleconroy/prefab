@@ -1,18 +1,18 @@
-.PHONY: build test fmt run stack
+.PHONY: build test fmt run
 
 test: fmt
-	cd stackgo && go test
+	cd prefab && go test
 
 fmt:
-	gofmt -l -w . stackgo
+	gofmt -l -w . prefab
 
 build: fmt
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o stack
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o pf
 
 run: fmt
 	go run software/postgresql/manifest.json
 
-stack.linux64.tar.gz: build
-	tar -czf stack.linux64.tar.gz stack
+prefab.linux64.tar.gz: build
+	tar -czf prefab.linux64.tar.gz pf
 
 

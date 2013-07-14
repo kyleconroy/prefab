@@ -21,8 +21,8 @@ _testmain.go
 
 *.exe
 
-stack
-stackgo/test
+pf
+prefab/test
 output
 
 .vagrant

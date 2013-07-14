@@ -1,4 +1,4 @@
-package stackgo
+package prefab
 
 import (
 	"io"
@@ -84,16 +84,16 @@ func Analyze() (Manifest, error) {
 }
 
 func (m Manifest) Begin() error {
-	err := os.MkdirAll("/var/stackgo", 0777)
+	err := os.MkdirAll("/var/prefab", 0777)
 
 	if err != nil {
 		return err
 	}
 
-	info, err := os.Stat("/var/stackgo/apt-update")
+	info, err := os.Stat("/var/prefab/apt-update")
 
 	if os.IsNotExist(err) {
-		_, err = os.Create("/var/stackgo/apt-update")
+		_, err = os.Create("/var/prefab/apt-update")
 
 		if err != nil {
 			return err

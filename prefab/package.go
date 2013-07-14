@@ -1,4 +1,4 @@
-package stackgo
+package prefab
 
 import (
 	"fmt"
