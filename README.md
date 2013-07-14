@@ -1,11 +1,9 @@
-# stackgo
+# prefab - a basic configuration amanger
 
-[![Build Status](https://travis-ci.org/stackmachine/stackgo.png?branch=master)](https://travis-ci.org/stackmachine/stackgo)
+[![Build Status](https://travis-ci.org/stackmachine/prefab.png?branch=master)](https://travis-ci.org/stackmachine/prefab)
 
-Configuration management you'll actually use
-
-`stackgo` takes a different approach than other configuration management
-systems. When configuring a server, stackgo uses a predetermined build order
+`prefab` takes a different approach than other configuration management
+systems. When configuring a server, prefab uses a predetermined build order
 for all resources.
 
 ## Configuration Order
