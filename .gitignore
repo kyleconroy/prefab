@@ -26,3 +26,5 @@ stackgo/test
 output
 
 .vagrant
+
+.DS_Store
