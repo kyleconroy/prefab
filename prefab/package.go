@@ -24,21 +24,9 @@ func (p Package) Install() error {
 	}
 	log.Println("Install package:", pkgName)
 
-	out, err := exec.Command("apt-cache", "policy", "-q", p.Name).Output()
-
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
-
-	for _, line := range strings.Split(string(out), "\n") {
-		sline := strings.TrimSpace(line)
-
-		if strings.HasPrefix(sline, "Installed: ") {
-			if !strings.HasSuffix(sline, "(none)") {
-				return nil
-			}
-		}
+	out, err := exec.Command("dpkg", "-s", p.Name).CombinedOutput()
+	if err == nil {
+		return nil
 	}
 
 	out, err = exec.Command("apt-get", "install", "-y", pkgName).Output()
