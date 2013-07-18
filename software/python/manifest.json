@@ -2,7 +2,7 @@
   "personal_package_archives": [
     {"name": "deadsnakes", "owner": "fkrull"}
   ],
-  "packages": [
+  "apt_packages": [
     {"name": "python3.3"}
   ]
 }

@@ -60,7 +60,7 @@ func (d Database) Create() error {
 
 type Manifest struct {
 	SourceLists     []SourceList             `json:"source_lists"`
-	Packages        []Package                `json:"packages"`
+	Packages        []Package                `json:"apt_packages"`
 	Directories     []Directory              `json:"directories"`
 	Templates       []Template               `json:"templates"`
 	PackageArchives []PersonalPackageArchive `json:"personal_package_archives"`

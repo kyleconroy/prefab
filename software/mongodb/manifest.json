@@ -8,7 +8,7 @@
       "components": ["10gen"]
     }]
   }],
-  "packages": [
+  "apt_packages": [
     {"name": "mongodb-10gen"}
   ],
   "services": [
