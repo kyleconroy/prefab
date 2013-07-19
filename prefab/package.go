@@ -15,27 +15,64 @@ type Package struct {
 	Version string `json:"version"`
 }
 
-func (p Package) Install() error {
-	var pkgName string
+func (p Package) ArchiveUrls(urls chan string) error {
+	pkgName := p.Name
+
 	if p.Version != "" {
 		pkgName = fmt.Sprintf("%s=%s", p.Name, p.Version)
-	} else {
-		pkgName = p.Name
 	}
-	log.Println("Install package:", pkgName)
 
 	out, err := exec.Command("dpkg", "-s", p.Name).CombinedOutput()
+
 	if err == nil {
 		return nil
 	}
 
-	out, err = exec.Command("apt-get", "install", "-y", pkgName).Output()
+	out, err = exec.Command("apt-get", "install", "-qq", "--print-uris", pkgName).CombinedOutput()
 
 	if err != nil {
 		log.Println(string(out))
+		return err
 	}
 
-	return err
+	for _, printedURI := range strings.Split(string(out), "\n") {
+
+		if len(printedURI) == 0 {
+			continue
+		}
+
+		parts := strings.Split(strings.Replace(printedURI, "'", "", -1), " ")
+
+		urls <- parts[0]
+
+	}
+
+	return nil
+}
+
+func (p Package) Install() error {
+	pkgName := p.Name
+
+	if p.Version != "" {
+		pkgName = fmt.Sprintf("%s=%s", p.Name, p.Version)
+	}
+
+	log.Println("Install package:", pkgName)
+
+	out, err := exec.Command("dpkg", "-s", p.Name).CombinedOutput()
+
+	if err == nil {
+		return nil
+	}
+
+	out, err = exec.Command("apt-get", "install", "-y", pkgName).CombinedOutput()
+
+	if err != nil {
+		log.Println(string(out))
+		return err
+	}
+
+	return nil
 }
 
 type Source struct {

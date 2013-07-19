@@ -5,9 +5,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
+	"path"
+	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -190,11 +194,88 @@ func (m Manifest) Converge() error {
 		}
 	}
 
+	archiveChannel := make(chan string)
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			for {
+
+				rawUrl, ok := <-archiveChannel
+
+				log.Println(rawUrl)
+
+				if !ok || len(rawUrl) == 0 {
+					//Channel is closed, we're finished
+					return
+				}
+
+				uri, err := url.Parse(rawUrl)
+
+				destination := filepath.Join("/var/cache/apt/archives", path.Base(uri.Path))
+
+				log.Println("Started downloading", uri.String())
+
+				_, err = os.Stat(destination)
+
+				if !os.IsNotExist(err) {
+					// Already exists, ignore
+					continue
+				}
+
+				out, err := os.Create(destination)
+
+				if err != nil {
+					continue
+				}
+
+				defer out.Close()
+
+				resp, err := http.Get(uri.String())
+
+				if err != nil {
+					continue
+				}
+
+				defer resp.Body.Close()
+
+				_, err = io.Copy(out, resp.Body)
+
+				if err != nil {
+					continue
+				}
+
+				log.Println("Finished downloading", uri.String())
+
+			}
+
+		}()
+	}
+
 	for _, pack := range m.Packages {
+		// Find all urls to download
+		err := pack.ArchiveUrls(archiveChannel)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	close(archiveChannel)
+
+	wg.Wait()
+
+	for _, pack := range m.Packages {
+		// Find all urls to download
 		err := pack.Install()
 
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
 
