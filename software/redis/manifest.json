@@ -2,7 +2,7 @@
   "personal_package_archives": [
     {"name": "redis", "owner": "rwky"}
   ],
-  "packages": [
+  "apt_packages": [
     {"name": "redis-server"}
   ],
   "services": [

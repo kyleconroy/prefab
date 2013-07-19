@@ -3,7 +3,7 @@
     {"url":"https://s3.amazonaws.com/dl.stackmachine.com/ruby/ruby-2.0.0.tgz",
      "path":"/usr/local/ruby"}
   ],
-  "packages": [
+  "apt_packages": [
     {"name": "libssl0.9.8"},
     {"name": "make"}
   ],

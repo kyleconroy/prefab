@@ -8,7 +8,7 @@
       "components": ["main"]
     }]
   }],
-  "packages": [
+  "apt_packages": [
     {"name": "rabbitmq-server"}
   ],
   "services": [

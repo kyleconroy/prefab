@@ -1,5 +1,5 @@
 {
-  "packages": [
+  "apt_packages": [
     {"name": "openjdk-7-jre"}
   ]
 }

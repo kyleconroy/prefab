@@ -2,7 +2,7 @@
   "personal_package_archives": [
     {"name": "stable", "owner": "nginx"}
   ],
-  "packages": [
+  "apt_packages": [
     {"name": "nginx"}
   ],
   "services": [
