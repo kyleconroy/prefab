@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 )
 
@@ -35,27 +34,6 @@ func download(uri string) (string, error) {
 	}
 
 	return f.Name(), nil
-}
-
-type Database struct {
-	Name string `json:"name"`
-}
-
-func (d Database) Create() error {
-	log.Println("Create database:", d.Name)
-
-	out, err := exec.Command("sudo", "-u", "postgres", "createdb", d.Name).CombinedOutput()
-
-	if strings.HasSuffix(strings.TrimSpace(string(out)), "already exists") {
-		return nil
-	}
-
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
-
-	return nil
 }
 
 type Manifest struct {
