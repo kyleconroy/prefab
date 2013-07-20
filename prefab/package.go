@@ -54,9 +54,12 @@ func (p Package) ArchiveUrls(urls chan string) error {
 }
 
 func (p Package) CheckInstall() error {
+	log.Println("Install package:", p.QualifiedName())
+
 	if !p.Installed() {
 		return p.Install()
 	}
+
 	return nil
 }
 
