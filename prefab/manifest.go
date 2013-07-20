@@ -164,7 +164,7 @@ func (m Manifest) Converge() error {
 	// make sure that the `add-apt-repository` command is available
 	if len(m.PackageArchives) > 0 {
 		pkg := Package{Name: "python-software-properties"}
-		err := pkg.Install()
+		err := pkg.CheckInstall()
 
 		if err != nil {
 			return err
@@ -194,88 +194,96 @@ func (m Manifest) Converge() error {
 		}
 	}
 
-	archiveChannel := make(chan string)
-
-	var wg sync.WaitGroup
-
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			for {
-
-				rawUrl, ok := <-archiveChannel
-
-				log.Println(rawUrl)
-
-				if !ok || len(rawUrl) == 0 {
-					//Channel is closed, we're finished
-					return
-				}
-
-				uri, err := url.Parse(rawUrl)
-
-				destination := filepath.Join("/var/cache/apt/archives", path.Base(uri.Path))
-
-				log.Println("Started downloading", uri.String())
-
-				_, err = os.Stat(destination)
-
-				if !os.IsNotExist(err) {
-					// Already exists, ignore
-					continue
-				}
-
-				out, err := os.Create(destination)
-
-				if err != nil {
-					continue
-				}
-
-				defer out.Close()
-
-				resp, err := http.Get(uri.String())
-
-				if err != nil {
-					continue
-				}
-
-				defer resp.Body.Close()
-
-				_, err = io.Copy(out, resp.Body)
-
-				if err != nil {
-					continue
-				}
-
-				log.Println("Finished downloading", uri.String())
-
-			}
-
-		}()
-	}
+	packagesToInstall := []Package{}
 
 	for _, pack := range m.Packages {
 		// Find all urls to download
-		err := pack.ArchiveUrls(archiveChannel)
+		log.Println("Install package:", pack.QualifiedName())
 
-		if err != nil {
-			log.Fatal(err)
+		if !pack.Installed() {
+			packagesToInstall = append(packagesToInstall, pack)
 		}
 	}
 
-	close(archiveChannel)
+	if len(packagesToInstall) > 0 {
 
-	wg.Wait()
+		archiveChannel := make(chan string)
 
-	for _, pack := range m.Packages {
-		// Find all urls to download
-		err := pack.Install()
+		var wg sync.WaitGroup
 
-		if err != nil {
-			log.Fatal(err)
+		for i := 0; i < 20; i++ {
+			wg.Add(1)
+
+			go func() {
+				defer wg.Done()
+
+				for {
+
+					rawUrl, ok := <-archiveChannel
+
+					if !ok || len(rawUrl) == 0 {
+						//Channel is closed, we're finished
+						return
+					}
+
+					uri, err := url.Parse(rawUrl)
+
+					destination := filepath.Join("/var/cache/apt/archives", path.Base(uri.Path))
+
+					_, err = os.Stat(destination)
+
+					if !os.IsNotExist(err) {
+						// Already exists, ignore
+						continue
+					}
+
+					out, err := os.Create(destination)
+
+					if err != nil {
+						continue
+					}
+
+					defer out.Close()
+
+					resp, err := http.Get(uri.String())
+
+					if err != nil {
+						continue
+					}
+
+					defer resp.Body.Close()
+
+					_, err = io.Copy(out, resp.Body)
+
+					if err != nil {
+						continue
+					}
+
+				}
+
+			}()
+		}
+
+		for _, pack := range packagesToInstall {
+			// Find all urls to download
+			err := pack.ArchiveUrls(archiveChannel)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		close(archiveChannel)
+
+		wg.Wait()
+
+		for _, pack := range packagesToInstall {
+			// Find all urls to download
+			err := pack.Install()
+
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
