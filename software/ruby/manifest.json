@@ -10,12 +10,12 @@
   "templates":[
     {
       "path": "/app/vendor/ruby-2.0.0/etc/gemrc",
-      "source": "ruby/templates/gemrc",
+      "source": "templates/gemrc",
       "mode": 644
     },
     {
       "path": "/etc/profile.d/system_ruby.sh",
-      "source": "ruby/templates/system_ruby.sh",
+      "source": "templates/system_ruby.sh",
       "mode": 644
     }
   ]

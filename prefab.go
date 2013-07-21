@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime/pprof"
 	"time"
 )
@@ -41,6 +42,14 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		absPath, err := filepath.Abs(path)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		userManifest.FixPaths(absPath)
 
 		manifest.Add(userManifest)
 	}

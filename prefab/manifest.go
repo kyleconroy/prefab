@@ -65,6 +65,13 @@ func Analyze() (Manifest, error) {
 	return Manifest{}, nil
 }
 
+func (m *Manifest) FixPaths(manifestPath string) {
+	for i, template := range m.Templates {
+		m.Templates[i].Source = filepath.Join(filepath.Dir(manifestPath), template.Source)
+	}
+
+}
+
 func (m Manifest) Begin() error {
 	err := os.MkdirAll("/var/prefab", 0777)
 
