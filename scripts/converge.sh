@@ -3,7 +3,7 @@ set -x
 
 pushd /vagrant/software
 
-./../pf postgresql/manifest.json redis/manifest.json \
+./../bin/prefab postgresql/manifest.json redis/manifest.json \
   python/manifest.json java6/manifest.json rabbitmq/manifest.json \
   nginx/manifest.json mongodb/manifest.json memcached/manifest.json \
   ruby/manifest.json

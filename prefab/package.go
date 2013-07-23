@@ -15,27 +15,65 @@ type Package struct {
 	Version string `json:"version"`
 }
 
-func (p Package) Install() error {
-	var pkgName string
+func (p Package) Installed() bool {
+	_, err := exec.Command("dpkg", "-s", p.QualifiedName()).CombinedOutput()
+	return err == nil
+}
+
+func (p Package) QualifiedName() string {
+	pkgName := p.Name
+
 	if p.Version != "" {
 		pkgName = fmt.Sprintf("%s=%s", p.Name, p.Version)
-	} else {
-		pkgName = p.Name
-	}
-	log.Println("Install package:", pkgName)
-
-	out, err := exec.Command("dpkg", "-s", p.Name).CombinedOutput()
-	if err == nil {
-		return nil
 	}
 
-	out, err = exec.Command("apt-get", "install", "-y", pkgName).Output()
+	return pkgName
+}
+
+func (p Package) ArchiveUrls(urls chan string) error {
+	out, err := exec.Command("apt-get", "install", "-qq", "--print-uris", p.QualifiedName()).CombinedOutput()
 
 	if err != nil {
 		log.Println(string(out))
+		return err
 	}
 
-	return err
+	for _, printedURI := range strings.Split(string(out), "\n") {
+
+		if len(printedURI) == 0 {
+			continue
+		}
+
+		parts := strings.Split(strings.Replace(printedURI, "'", "", -1), " ")
+
+		urls <- parts[0]
+
+	}
+
+	return nil
+}
+
+func (p Package) CheckInstall() error {
+	log.Println("Install package:", p.QualifiedName())
+
+	if !p.Installed() {
+		return p.Install()
+	}
+
+	return nil
+}
+
+func (p Package) Install() error {
+	pkgName := p.QualifiedName()
+
+	out, err := exec.Command("apt-get", "install", "-y", pkgName).CombinedOutput()
+
+	if err != nil {
+		log.Println(string(out))
+		return err
+	}
+
+	return nil
 }
 
 type Source struct {
