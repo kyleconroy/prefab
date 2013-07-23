@@ -47,6 +47,7 @@ type Manifest struct {
 	Symlinks        []Symlink                `json:"symlinks"`
 	Services        []Service                `json:"services"`
 	Databases       []Database               `json:"postgres_databases"`
+	DatabaseUsers   []DatabaseUser           `json:"postgres_database_users"`
 }
 
 func Analyze() (Manifest, error) {
@@ -224,6 +225,14 @@ func (m Manifest) Converge() error {
 		}
 	}
 
+	for _, dbu := range m.DatabaseUsers {
+		err := dbu.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -237,5 +246,6 @@ func (m *Manifest) Add(other Manifest) {
 	m.Users = append(m.Users, other.Users...)
 	m.Services = append(m.Services, other.Services...)
 	m.Databases = append(m.Databases, other.Databases...)
+	m.DatabaseUsers = append(m.DatabaseUsers, other.DatabaseUsers...)
 	m.Symlinks = append(m.Symlinks, other.Symlinks...)
 }

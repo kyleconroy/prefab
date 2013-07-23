@@ -10,9 +10,25 @@ type DatabaseExtension struct {
 	Name string `json:"name"`
 }
 
+type DatabaseUser struct {
+	Name string `json:"name"`
+}
+
 type Database struct {
 	Name       string              `json:"name"`
 	Extensions []DatabaseExtension `json:"extensions"`
+}
+
+func (d DatabaseUser) Create() error {
+	log.Println("Create database user:", d.Name)
+
+	_, err := exec.Command("sudo", "-u", "postgres", "createuser", d.Name).CombinedOutput()
+
+	if err != nil {
+		log.Println("Database user exists")
+	}
+
+	return nil
 }
 
 func (d Database) Create() error {
