@@ -52,6 +52,7 @@ type Manifest struct {
 	Services        []Service                `json:"services"`
 	Databases       []Database               `json:"postgres_databases"`
 	DatabaseUsers   []DatabaseUser           `json:"postgres_database_users"`
+	RubyBundles     []RubyBundle             `json:"ruby_bundles"`
 }
 
 func Analyze() (Manifest, error) {
@@ -306,14 +307,6 @@ func (m Manifest) Converge() error {
 		}
 	}
 
-	for _, service := range m.Services {
-		err := service.Create()
-
-		if err != nil {
-			return err
-		}
-	}
-
 	for _, db := range m.Databases {
 		err := db.Create()
 
@@ -324,6 +317,22 @@ func (m Manifest) Converge() error {
 
 	for _, dbu := range m.DatabaseUsers {
 		err := dbu.Create()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, rb := range m.RubyBundles {
+		err := rb.Install()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, service := range m.Services {
+		err := service.Create()
 
 		if err != nil {
 			return err
@@ -345,4 +354,5 @@ func (m *Manifest) Add(other Manifest) {
 	m.Databases = append(m.Databases, other.Databases...)
 	m.DatabaseUsers = append(m.DatabaseUsers, other.DatabaseUsers...)
 	m.Symlinks = append(m.Symlinks, other.Symlinks...)
+	m.RubyBundles = append(m.RubyBundles, other.RubyBundles...)
 }

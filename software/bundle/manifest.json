@@ -1,0 +1,17 @@
+{
+  "templates": [
+    {
+      "source": "templates/Gemfile",
+      "path": "/app/Gemfile"
+    },
+    {
+      "source": "templates/Gemfile.lock",
+      "path": "/app/Gemfile.lock"
+    }
+  ],
+  "ruby_bundles": [
+    {
+      "path": "/app/Gemfile"
+    }
+  ]
+}
