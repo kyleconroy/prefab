@@ -105,6 +105,7 @@ func (m Manifest) Begin() error {
 
 		log.Println("Run `apt-get update`")
 		out, err := exec.Command("apt-get", "update").CombinedOutput()
+		os.Chtimes("/var/prefab/apt-update", time.Now(), time.Now())
 
 		if err != nil {
 			log.Println(string(out))
